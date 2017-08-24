@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class TacoBehaviour : NetworkBehaviour {
+public class TacoBehaviour : MonoBehaviour {
 	public	float start = 0f;
 	public float lifespan = 0.25f;
 	public GameObject explosion;
 	public float despawnTime;
-
-	[SyncVar]
-	public string _ownerId;
+	public string OwnerId;
 
 	void Start () {
 		start = Time.time;
@@ -18,9 +16,9 @@ public class TacoBehaviour : NetworkBehaviour {
 	}
 
 	void Despawn() {
-		NetworkServer.Destroy (gameObject);
-		var position = this.transform.position;
+		var position = transform.position;
 		var explosionInstance = Instantiate (explosion, position, Quaternion.identity);
+		Destroy (gameObject);
 	}
 
 	bool IsOwner (GameObject gameObject)
@@ -28,7 +26,7 @@ public class TacoBehaviour : NetworkBehaviour {
 		if (gameObject.tag == "Player") {
 			var id = gameObject.GetComponent<PlayerId> ().Value;
 
-			if (id == _ownerId)
+			if (id == OwnerId)
 				return true;
 		}
 		return false;

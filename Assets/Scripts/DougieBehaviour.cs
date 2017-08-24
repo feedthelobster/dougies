@@ -6,28 +6,27 @@ using UnityEngine;
 public class DougieBehaviour : NetworkBehaviour {
 
 	public Quaternion SpriteRot;
-	public Rigidbody2D rigidbody;
-	public Transform transform;
-	public Collider2D feet;
-	private DougieAttributes attributes;
-	private DougieStates states;
+	public Rigidbody2D Rigidbody;
+	public Transform Transform;
 	public GameObject Balloons;
 	public Animator BalloonsAnimator;
 	public GameObject taco;
 	public Vector3 position;
 	public PlayerId Id;
+	private DougieAttributes attributes;
+	private DougieStates states;
 	private NetworkIdentity _networkIdentity;
 
 	void Awake(){
-		transform = GetComponent<Transform>();
-		rigidbody = GetComponent<Rigidbody2D>();
+		Transform = GetComponent<Transform>();
+		Rigidbody = GetComponent<Rigidbody2D>();
 	}
 
 	void Start () {
 		Id = GetComponent<PlayerId> ();
 		states = GetComponent<DougieStates>();
 		attributes= GetComponent<DougieAttributes>();
-		rigidbody = GetComponent<Rigidbody2D>();
+		Rigidbody = GetComponent<Rigidbody2D>();
 		_networkIdentity = GetComponent<NetworkIdentity> ();
 	}
 
@@ -44,21 +43,35 @@ public class DougieBehaviour : NetworkBehaviour {
 			speed *= -1;
 		}
 
-		Vector3 offset = transform.position + new Vector3 (horizontalOffset, 0, 0);
+		Vector3 offset = Transform.position + new Vector3 (horizontalOffset, 0, 0);
 		Vector2 velocity = new Vector2 (speed, 0);
 
 		CmdShoot (offset, velocity, Id.Value);
 		attributes.nextTacoShot = Time.time + attributes.tacoFireRate;
 		states.shooting = false;
+
+		InstantiateProjectile (offset, velocity, Id.Value);
 	}
 
 	[Command]
 	void CmdShoot(Vector3 position, Vector2 velocity, string id) {
+		RpcShoot (position, velocity, id);
+	}
+
+	void InstantiateProjectile(Vector3 position, Vector2 velocity, string id) {
 		var gameObject = Instantiate (taco, position, Quaternion.identity);
 		gameObject.GetComponent<Rigidbody2D> ().velocity = new Vector2(velocity.x, velocity.y);
+		gameObject.transform.rotation = transform.rotation;
 		var tacoBehaviour = gameObject.GetComponent<TacoBehaviour> ();
-		tacoBehaviour._ownerId = id;
-		NetworkServer.SpawnWithClientAuthority(gameObject, connectionToClient);
+		tacoBehaviour.OwnerId = id;
+	}
+
+	[ClientRpc]
+	void RpcShoot(Vector3 position, Vector2 velocity, string id) {
+		
+		if (isLocalPlayer && id == Id.Value) 
+			return;
+		InstantiateProjectile (position, velocity, id);
 	}
 
 	void UpdateAnimation ()
@@ -74,6 +87,9 @@ public class DougieBehaviour : NetworkBehaviour {
 		
 		Jump();
 		Move();
+
+		if (states.shooting) 
+			Shoot ();
 	}
 
 	void Update () {
@@ -84,15 +100,12 @@ public class DougieBehaviour : NetworkBehaviour {
 			return;
 
 		Flip();
-
-		if (states.shooting) 
-			Shoot ();
-		position = transform.position;
+		position = Transform.position;
 	}
 
 	Vector2 GetUpwardForce ()
 	{
-		float y = rigidbody.velocity.y;
+		float y = Rigidbody.velocity.y;
 
 		if (y < 0)
 			y = 0;
@@ -103,10 +116,9 @@ public class DougieBehaviour : NetworkBehaviour {
 
 	void SetVerticalForce ()
 	{
-		
-		rigidbody.AddForce (GetUpwardForce());
-		if (rigidbody.velocity.y >= attributes.verticalSpeedLimit)
-			rigidbody.velocity = new Vector2(rigidbody.velocity.x, attributes.verticalSpeedLimit);
+		Rigidbody.AddForce (GetUpwardForce());
+		if (Rigidbody.velocity.y >= attributes.verticalSpeedLimit)
+			Rigidbody.velocity = new Vector2(Rigidbody.velocity.x, attributes.verticalSpeedLimit);
 	}
 
 	void Jump(){
@@ -119,22 +131,22 @@ public class DougieBehaviour : NetworkBehaviour {
 	void LimitFallingForce ()
 	{
 		float fallingForceLimit = attributes.verticalSpeedLimit * -2f;
-		if (rigidbody.velocity.y <= fallingForceLimit)
-			rigidbody.velocity = new Vector2 (rigidbody.velocity.x, fallingForceLimit);
+		if (Rigidbody.velocity.y <= fallingForceLimit)
+			Rigidbody.velocity = new Vector2 (Rigidbody.velocity.x, fallingForceLimit);
 	}
 
 	void Stop ()
 	{
-		if (Mathf.Abs (rigidbody.velocity.x) > 0.25f)
-			rigidbody.AddForce (new Vector2 (rigidbody.velocity.x * -1.25f, 0));
+		if (Mathf.Abs (Rigidbody.velocity.x) > 0.25f)
+			Rigidbody.AddForce (new Vector2 (Rigidbody.velocity.x * -1.25f, 0));
 		else
-			rigidbody.velocity = new Vector2 (0, rigidbody.velocity.y);
+			Rigidbody.velocity = new Vector2 (0, Rigidbody.velocity.y);
 	}
 
 	 void ChangeDirection ()
 	{
-		if (states.left && rigidbody.velocity.x > 3 || states.right && rigidbody.velocity.x < -3) 
-			rigidbody.velocity = new Vector2 (rigidbody.velocity.x * 0.95f, rigidbody.velocity.y);
+		if (states.left && Rigidbody.velocity.x > 3 || states.right && Rigidbody.velocity.x < -3) 
+			Rigidbody.velocity = new Vector2 (Rigidbody.velocity.x * 0.95f, Rigidbody.velocity.y);
 	}
 
 	void SetHorizontalForce()
@@ -143,11 +155,11 @@ public class DougieBehaviour : NetworkBehaviour {
 			ChangeDirection ();
 
 			float x = states.left ? attributes.horizontalMovingForce * -1 : attributes.horizontalMovingForce;
-			rigidbody.AddForce (new Vector2(x, 0));
+			Rigidbody.AddForce (new Vector2(x, 0));
 
-			if (Mathf.Abs (rigidbody.velocity.x) > attributes.horizontalSpeedLimit) {
-				float speed = rigidbody.velocity.x > 0 ? attributes.horizontalSpeedLimit : attributes.horizontalSpeedLimit * -1;
-				rigidbody.velocity = new Vector2 (speed, rigidbody.velocity.y);
+			if (Mathf.Abs (Rigidbody.velocity.x) > attributes.horizontalSpeedLimit) {
+				float speed = Rigidbody.velocity.x > 0 ? attributes.horizontalSpeedLimit : attributes.horizontalSpeedLimit * -1;
+				Rigidbody.velocity = new Vector2 (speed, Rigidbody.velocity.y);
 			}
 		}
 		else 
@@ -162,23 +174,34 @@ public class DougieBehaviour : NetworkBehaviour {
 
 	void Flip(){
 		if(states.goingLeft)
-			transform.rotation = Quaternion.Euler(0,180, 0);
+			Transform.rotation = Quaternion.Euler(0,180, 0);
 		else
-			transform.rotation = Quaternion.Euler(0,0, 0);
+			Transform.rotation = Quaternion.Euler(0,0, 0);
 	}
 
 	void OnTriggerEnter2D(Collider2D collision) {
 		var gameObject = collision.gameObject;
 
 		if (collision.gameObject.tag == "Taco") {
-			var id = gameObject.GetComponent<TacoBehaviour> ()._ownerId;
 
-			if(id != _networkIdentity.netId.ToString())
-				attributes.Hp -= 1;
+			if (!isServer)
+				return;
+			
+			var id = gameObject.GetComponent<TacoBehaviour> ().OwnerId;
 
-			if (attributes.Hp < 1)
-				Destroy (this.gameObject);
+			if (id != _networkIdentity.netId.ToString ())
+				RpcTakeDamage (_networkIdentity.netId.ToString ());
 		}
     }
 
+	[ClientRpc]
+	void RpcTakeDamage(string id)
+	{
+		if (id != _networkIdentity.netId.ToString ())
+			return;
+		
+		attributes.Hp -= 1;
+		if (attributes.Hp < 1)
+			Destroy (this.gameObject);
+	}
 }

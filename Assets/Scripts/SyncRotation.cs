@@ -8,10 +8,6 @@ public class SyncRotation : NetworkBehaviour {
 	[SyncVar]
 	private float rotation;
 
-	void Start () {
-		
-	}
-
 	void Update () {
 		if (isLocalPlayer)
 			CmdSync (transform.rotation.y);
