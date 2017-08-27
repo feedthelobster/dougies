@@ -7,15 +7,15 @@ using NATTraversal;
 public class CustomNetworkManager : NATTraversal.NetworkManager {
 
 	[SerializeField]
-	GameObject _canvas;
+	GameObject _connectionPanel;
 
-	private void HideCanvas() {
-		_canvas.SetActive (false);
+	private void HideConnectionPanel() {
+		_connectionPanel.SetActive (false);
 	}
 
 	public void Host () {
 		StartHostAll ("default", matchSize);
-		HideCanvas ();
+		HideConnectionPanel ();
 	}
 
 	public void Join () {
@@ -27,7 +27,7 @@ public class CustomNetworkManager : NATTraversal.NetworkManager {
 		if (success && matchList.Count > 0) {
 			var match = matchList [0];
 			StartClientAll (match);	
-			HideCanvas ();
+			HideConnectionPanel ();
 		}
 	}
 }
