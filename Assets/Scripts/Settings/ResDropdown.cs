@@ -2,13 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+public class ResDropdown : MonoBehaviour {
 
-public class Resolution : MonoBehaviour {
-
-
-	// Update is called once per frame
-	 
-    public Dropdown drop;
+	   public Dropdown drop;
 
      	public void ChangeRes(){
      		
@@ -35,4 +31,5 @@ public class Resolution : MonoBehaviour {
 
      		}
      	}
+
 }
