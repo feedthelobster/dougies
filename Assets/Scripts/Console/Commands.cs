@@ -11,6 +11,10 @@ public class Commands {
 	public static void Ping() {
 		Instance.Ping ();
 	}
-		
+
+	[Command(Alias = "lmatch", Usage = "matches", Description = "Lists matches available")]
+	public static void ListMatches() {
+		Instance.ListMatches ();
+	}
 
 }
