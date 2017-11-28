@@ -36,8 +36,15 @@ public class ConsoleBehaviour : MonoBehaviour {
 			Debug.Log ("Error Joining Match");
 			yield break;
 		}
-			
-		//TODO: Implement command on commands.cs, refactor CustomNetworkManager.cs
+
+		var match = _cm.MatchList.FirstOrDefault (x => GetMatchName (x) == name);
+
+		if(match == null) {
+			Debug.Log ("Match not found");
+			yield break;
+		}
+
+		_cm.Join (match);
 	}
 
 	public void CreateMatch(string name) {

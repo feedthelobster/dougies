@@ -13,8 +13,8 @@ public class CustomNetworkManager : NATTraversal.NetworkManager {
 		StartHostAll (name, matchSize);
 	}
 
-	public void Join () {
-		matchMaker.ListMatches(0, 10, "", true, 0, 0, OnMatchList);		
+	public void Join (MatchInfoSnapshot match) {
+		StartClientAll (match);	
 	}
 
 	public IEnumerator FetchMatches () {
@@ -34,18 +34,5 @@ public class CustomNetworkManager : NATTraversal.NetworkManager {
 			return;
 		
 		MatchList = matchList;
-	}
-
-	public override void OnMatchList (bool success, string extendedInfo, List<MatchInfoSnapshot> matchList)
-	{
-		if (!success)
-			return;
-
-		OnMatchListFetched (success, extendedInfo, matchList);
-
-		if (MatchList.Count > 0) {
-			var match = MatchList [0];
-			StartClientAll (match);	
-		}
 	}
 }
