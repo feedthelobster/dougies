@@ -116,8 +116,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1158156551}
-  - component: {fileID: 1158156553}
   - component: {fileID: 1158156550}
+  - component: {fileID: 1158156554}
+  - component: {fileID: 1158156553}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -133,7 +134,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1158156549}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -1989760260, guid: db5d01b7e51ecd2498d448ad7b98d993, type: 3}
+  m_Script: {fileID: -1989760260, guid: 6da7e87bef544bb49994977176785e6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   facilitatorIP: grabblesgame.com
@@ -164,7 +165,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1158156549}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44c3b51f071b91c42aeb279bd68c03fb, type: 3}
+  m_Script: {fileID: 11500000, guid: f442759c9ac272149bb75b99b41f7944, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_NetworkPort: 7777
@@ -176,7 +177,7 @@ MonoBehaviour:
   m_ScriptCRCCheck: 1
   m_MaxDelay: 0.01
   m_LogLevel: 2
-  m_PlayerPrefab: {fileID: 130118, guid: 1a279489298bb4a46ac04705860fc6a3, type: 2}
+  m_PlayerPrefab: {fileID: 192368, guid: 7db27d805ad9dce4b91341c5f1ed3f1f, type: 2}
   m_AutoCreatePlayer: 1
   m_PlayerSpawnMethod: 0
   m_OfflineScene: 
@@ -241,12 +242,27 @@ MonoBehaviour:
   connectPunchthrough: 1
   connectRelay: 1
   autoConnectToFacilitator: 1
-  useUnityMatchmaking: 1
+  useUnityMatchmaking: 0
   externalIPSource: http://ipv4.icanhazip.com
   externalIPv6Source: http://ipv6.icanhazip.com
   externalIPTimeout: 10
   clientPort: 0
   delayDirectConnection: 0
+--- !u!114 &1158156554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1158156549}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb0894e4ddd7cb04198fe224d44a477a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeout: 5
+  matchmakerURL: grabblesgame.com
+  matchmakingPort: 20202
+  externalIPSource: icanhazip.com
 --- !u!1 &1494027077
 GameObject:
   m_ObjectHideFlags: 0

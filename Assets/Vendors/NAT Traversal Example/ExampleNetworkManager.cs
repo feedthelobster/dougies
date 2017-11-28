@@ -2,11 +2,13 @@
 #if UNITY_5_4 || UNITY_5_5 || UNITY_5_6 || UNITY_5_7 || UNITY_5_8 || UNITY_5_9 || UNITY_6 || UNITY_2017 || UNITY_2018 || UNITY_2019 || UNITY_2020
 #define NEW_STUFF
 #endif
+using NATTraversal;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.Networking.Match;
 using UnityEngine.Networking.NetworkSystem;
+using UnityEngine.Networking.Types;
 
 [HelpURL("http://grabblesgame.com/nat-traversal/docs/class_n_a_t_traversal_1_1_network_manager.html")]
 public class ExampleNetworkManager : NATTraversal.NetworkManager
@@ -39,31 +41,7 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
 #if NEW_STUFF
         match = matchList[0];
 #else
-        if (natHelper.guid != 0)
-        {
-            // If we have a guid we can use it to make sure we don't try and join our own old match 
-            // This is only necessary thanks to a bug in 5.2 and 5.3 that prevents matches from 
-            // being immediately destroyed
-            foreach (MatchDesc m in matchList.matches)
-            {
-                string[] parts = m.name.Split('|');
-                ulong hostGUID;
-                ulong.TryParse(parts[parts.Length - 1], out hostGUID);
-                if (hostGUID == natHelper.guid)
-                {
-                    Debug.Log("Not joining old match");
-                }
-                else
-                {
-                    match = m;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            match = matchList.matches[0];
-        }
+        match = matchList.matches[0];
 #endif
 
         if (match == null)
@@ -83,14 +61,14 @@ public class ExampleNetworkManager : NATTraversal.NetworkManager
         if (GUI.Button(new Rect(10, 10, 150, 100), "Host"))
         {
             if (matchMaker == null) matchMaker = gameObject.AddComponent<NetworkMatch>();
+            StartMatchMaker();
 
-            //matchMaker.CreateMatch("test", 10, true, "", OnMatchCreate);
             StartHostAll("Hello World", customConfig ? (uint)(maxConnections + 1) : matchSize);
         }
         if (GUI.Button(new Rect(10, 110, 150, 100), "Join"))
         {
             if (matchMaker == null) matchMaker = gameObject.AddComponent<NetworkMatch>();
-
+            StartMatchMaker();
 #if NEW_STUFF
             matchMaker.ListMatches(0, 10, "", true, 0, 0, OnMatchList);
 #else
