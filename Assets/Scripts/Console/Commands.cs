@@ -17,4 +17,16 @@ public class Commands {
 		Instance.ListMatches ();
 	}
 
+	[Command(Alias = "join", Description = "Join a match by name", Usage = "join \"name\"")]
+	public static void Join(string name)
+	{
+		Instance.JoinMatch (name);
+	}
+
+	[Command(Alias = "create", Description = "create a match", Usage = "create \"name\"")]
+	public static void Create(string name)
+	{
+		Instance.CreateMatch (name);
+	}
+
 }

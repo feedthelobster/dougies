@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using RTC.Core;
 using UnityEngine.Networking.Match;
+using System.Linq;
 
 public class ConsoleBehaviour : MonoBehaviour {
 
@@ -22,10 +23,37 @@ public class ConsoleBehaviour : MonoBehaviour {
 		for (int i = 0; i < 5; i++) 
 			Invoke ("LogRTT", i);
 	}
+		
+	public void JoinMatch(string name) {
+		StartCoroutine (JoinMatchRoutine(name));
+	}
 
-	public void ListMatches() {
-		_cm.FetchMatches ();
-		Invoke ("ListMatchesRoutine", 1);
+	public IEnumerator JoinMatchRoutine(string name) {
+
+		yield return StartCoroutine (_cm.FetchMatches ());
+
+		if (_cm.MatchList == null) {
+			Debug.Log ("Error Joining Match");
+			yield break;
+		}
+			
+		//TODO: Implement command on commands.cs, refactor CustomNetworkManager.cs
+	}
+
+	public void CreateMatch(string name) {
+		StartCoroutine (CreateMatchRoutine(name));	
+	}
+
+	public IEnumerator CreateMatchRoutine(string name) {
+		yield return StartCoroutine(_cm.FetchMatches ());
+
+		var filtered = _cm.MatchList
+			.Where (x => GetMatchName (x) == name).ToList();
+
+		if(filtered.Count > 0)
+			name += "(" + filtered.Count + ")";
+
+		_cm.Host (name);
 	}
 
 	private string GetMatchName (MatchInfoSnapshot match)
@@ -33,23 +61,29 @@ public class ConsoleBehaviour : MonoBehaviour {
 		return match.name.Split ('|') [0];
 	}
 
-	public void ListMatchesRoutine() {
+	public void ListMatches() {
+		StartCoroutine (ListMatchesRoutine());
+	}
+
+	public IEnumerator ListMatchesRoutine() {
 		Debug.Log ("Fetching Matches...");
 
-		if (_cm.FetchingMatches)
-			Invoke ("ListMatchesRoutine", 1);
-		else {
-			if (_cm.MatchList.Count < 1) {
-				Debug.Log ("No matches found");
-				return;
-			}
+		yield return StartCoroutine (_cm.FetchMatches ());
 
-			Delimiter ();
-			Debug.Log ("Matches found:");
-			foreach (MatchInfoSnapshot match in _cm.MatchList) 
-				Debug.Log (GetMatchName(match));
-			Delimiter ();
+		if (_cm.MatchList == null) {
+			Debug.Log ("Error Fetching Matches");
+			yield break;
 		}
+
+		if (_cm.MatchList.Count < 1) {
+			Debug.Log ("No matches found");
+			yield break;
+		}
+
+		Delimiter ();
+		foreach (MatchInfoSnapshot match in _cm.MatchList) 
+			Debug.Log (GetMatchName(match));
+		Delimiter ();
 	}
 
 	void Delimiter() {
